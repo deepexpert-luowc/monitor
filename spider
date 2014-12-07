@@ -1,0 +1,36 @@
+__author__ = 'Administrator'
+#coding:utf-8
+import urllib
+import urllib2
+import re
+import time
+import MySQLdb
+def monitor(url,req):
+  content = urllib.urlopen(url)
+  c=content.read()
+  print c
+  pattern = re.compile(req)
+  p = pattern.findall(c)
+  for i in p:
+      print i
+      db = MySQLdb.connect("localhost","root","123456","example" )
+      cursor = db.cursor()
+      sql = """insert into mytable values ("%s")"""
+      try:
+          cursor.execute(sql%(i))
+          db.commit()
+      except:
+             db.rollback()
+             db.close
+  print "一小时刷新一次"
+url1="http://hq.sinajs.cn/?rn=1417849788501&list=DINIW"
+url2="http://hq.sinajs.cn/?rn=1417850863163&list=USDCNY"
+url3="http://hq2gjqh.eastmoney.com/em_futures2010numericapplication/index.aspx?type=f&id=CONC0&v=1417846985163&_=1417846985163"
+req1='hq_str_DINIW=.*?,(.*?),.*?"'
+req2='var hq_str_USDCNY=".*?,(.*?),.*?"'
+req3='extendedFutures:\["0.00,0|0.00,0",".*?,(.*?),.*?"]'
+while 1:
+ monitor(url1,req1)
+ monitor(url2,req2)
+ monitor(url3,req3)
+ time.sleep(3600)
